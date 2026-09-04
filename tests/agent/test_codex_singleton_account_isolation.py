@@ -11,7 +11,9 @@ import pytest
 def _write_auth_store(tmp_path, payload: dict) -> None:
     hermes_home = tmp_path / "hermes"
     hermes_home.mkdir(parents=True, exist_ok=True)
-    (hermes_home / "auth.json").write_text(json.dumps(payload, indent=2))
+    (hermes_home / "auth.json").write_text(
+        json.dumps(payload, indent=2), encoding="utf-8"
+    )
 
 
 def _jwt_with_claims(claims: dict) -> str:
@@ -249,7 +251,9 @@ def test_independent_manual_refresh_uses_own_pair_and_leaves_singleton_unchanged
     assert refreshed.access_token == refreshed_manual_access
     assert refreshed.refresh_token == "refresh-b2"
 
-    persisted = json.loads((tmp_path / "hermes" / "auth.json").read_text())
+    persisted = json.loads(
+        (tmp_path / "hermes" / "auth.json").read_text(encoding="utf-8")
+    )
     assert persisted["providers"]["openai-codex"]["tokens"] == {
         "access_token": singleton_access,
         "refresh_token": "refresh-a",
@@ -316,7 +320,9 @@ def test_independent_manual_terminal_refresh_persists_dead_without_quarantining_
     assert by_id["manual-b"].last_status == STATUS_DEAD
     assert by_id["manual-b"].last_error_reason == reason
 
-    persisted = json.loads((tmp_path / "hermes" / "auth.json").read_text())
+    persisted = json.loads(
+        (tmp_path / "hermes" / "auth.json").read_text(encoding="utf-8")
+    )
     assert persisted["providers"]["openai-codex"]["tokens"] == {
         "access_token": singleton_access,
         "refresh_token": "refresh-a",
@@ -388,7 +394,9 @@ def test_429_rotation_does_not_rewrite_fallback_manual_token_pair(
     assert next_entry.access_token == access_b
     assert next_entry.refresh_token == "refresh-b"
 
-    persisted = json.loads((tmp_path / "hermes" / "auth.json").read_text())
+    persisted = json.loads(
+        (tmp_path / "hermes" / "auth.json").read_text(encoding="utf-8")
+    )
     persisted_b = next(
         entry
         for entry in persisted["credential_pool"]["openai-codex"]
